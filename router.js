@@ -1,6 +1,6 @@
 // In your router file (./router.js or similar)
 const express = require("express");
-const { adminLogin } = require("./controller/adminController");
+const { adminLogin, getAllSkills, addSkill, deleteSkill, updateAdminProfile, getAdminProfile } = require("./controller/adminController");
 const multerConfig = require("./middleware/imgMulter");
 const { addProject, getAllProjects, deleteProject, updateProject, getSingleProject } = require("./controller/ProjectController");
 
@@ -24,5 +24,16 @@ router.delete("/delete/:id", deleteProject); // Changed from "/delete/:id"
 
 //update project - CHANGE to match React
 router.put("/update/:id", multerConfig.single("image"), updateProject); // Changed from "/update/:id"
+//skills
+router.post("/skills-add", addSkill);
+//get all skills
+router.get("/get-skills", getAllSkills);
+//delete skills
+// DELETE skill by id
+router.delete('/skills/:id',deleteSkill);
 
+//admin profile
+router.put("/admin/update/:id",multerConfig.single("profile") ,updateAdminProfile);
+// 🔹 GET PROFILE (🔥 REQUIRED FOR REFRESH)
+router.get("/admin/profile/:id", getAdminProfile);
 module.exports = router;

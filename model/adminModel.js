@@ -13,6 +13,12 @@ const adminSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+
+  description: {
+    type: String,
+    default: "",
+  },
+
 });
 
 const adminModel = mongoose.model("adminlogin", adminSchema);
