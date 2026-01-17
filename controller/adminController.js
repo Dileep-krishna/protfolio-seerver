@@ -1,5 +1,8 @@
 const adminModel = require("../model/adminModel");
+const AdminResume = require("../model/AdminResumeModel");
+const fs = require("fs");
 const Skills = require("../model/adminSkillModel");
+const path = require("path");
 
 exports.adminLogin = async (req, res) => {
   const { email, password } = req.body;
@@ -29,7 +32,7 @@ exports.adminLogin = async (req, res) => {
 exports.getAllSkills = async (req, res) => {
   try {
     const skills = await Skills.find();
-    const grouped = { frontend: [], backend: [], tools: [] };
+    const grouped = { frontend: [], backend: [], tools: [],programmingLanguage:[] };
     skills.forEach(skill => {
       grouped[skill.category].push(skill);
     });
@@ -131,5 +134,104 @@ exports.getAdminProfile = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+//resume controller
 
+exports.uploadResume = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const resume = new AdminResume({
+      filename: req.file.filename,
+      filepath: `/Imguploads/${req.file.filename}`
+    });
+
+    await resume.save();
+
+    res.status(201).json({
+      message: "Resume uploaded successfully",
+      resume
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * 📄 Get Latest Resume
+ */
+exports.getResume = async (req, res) => {
+  try {
+    const resume = await AdminResume.findOne().sort({ createdAt: -1 });
+
+    if (!resume) {
+      return res.status(404).json({ message: "No resume found" });
+    }
+
+    res.status(200).json(resume);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * 🔄 Update Resume (Replace Old File)
+ */
+exports.updateResume = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const resume = await AdminResume.findById(req.params.id);
+
+    if (!resume) {
+      return res.status(404).json({ message: "Resume not found" });
+    }
+
+    // delete old file
+    const oldPath = path.join(__dirname, "..", resume.filepath);
+    if (fs.existsSync(oldPath)) {
+      fs.unlinkSync(oldPath);
+    }
+
+    resume.filename = req.file.filename;
+    resume.filepath = `/Imguploads/${req.file.filename}`;
+    resume.uploadedAt = Date.now();
+
+    await resume.save();
+
+    res.status(200).json({
+      message: "Resume updated successfully",
+      resume
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * ❌ Delete Resume
+ */
+exports.deleteResume = async (req, res) => {
+  try {
+    const resume = await AdminResume.findById(req.params.id);
+
+    if (!resume) {
+      return res.status(404).json({ message: "Resume not found" });
+    }
+
+    const filePath = path.join(__dirname, "..", resume.filepath);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    await AdminResume.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({ message: "Resume deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
