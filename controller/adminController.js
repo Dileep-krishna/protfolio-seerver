@@ -3,6 +3,7 @@ const AdminResume = require("../model/AdminResumeModel");
 const fs = require("fs");
 const Skills = require("../model/adminSkillModel");
 const path = require("path");
+const Certificate = require("../model/adminCertificateModel");
 
 exports.adminLogin = async (req, res) => {
   const { email, password } = req.body;
@@ -232,6 +233,68 @@ exports.deleteResume = async (req, res) => {
     res.status(200).json({ message: "Resume deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+//admin certificate
+// ✅ ADD CERTIFICATE
+exports.addCertificate = async (req, res) => {
+  try {
+    const { title } = req.body;
+
+    if (!title) {
+      return res.status(400).json({ message: "Title is required" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: "File is required" });
+    }
+
+    const certificate = new Certificate({
+      title,
+      fileUrl: req.file.path.replace(/\\/g, "/"),
+      fileType: req.file.mimetype,
+    });
+
+    await certificate.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Certificate uploaded successfully",
+      data: certificate,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ✅ GET ALL CERTIFICATES
+exports.getAllCertificates = async (req, res) => {
+  try {
+    const certificates = await Certificate.find().sort({ createdAt: -1 });
+    res.status(200).json(certificates);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ✅ DELETE CERTIFICATE
+exports.deleteCertificate = async (req, res) => {
+  try {
+    const certificate = await Certificate.findById(req.params.id);
+
+    if (!certificate) {
+      return res.status(404).json({ message: "Certificate not found" });
+    }
+
+    await certificate.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: "Certificate deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 

@@ -1,6 +1,6 @@
 // In your router file (./router.js or similar)
 const express = require("express");
-const { adminLogin, getAllSkills, addSkill, deleteSkill, updateAdminProfile, getAdminProfile, updateResume, getResume, deleteResume, uploadResume } = require("./controller/adminController");
+const { adminLogin, getAllSkills, addSkill, deleteSkill, updateAdminProfile, getAdminProfile, updateResume, getResume, deleteResume, uploadResume, deleteCertificate, getAllCertificates, addCertificate } = require("./controller/adminController");
 const multerConfig = require("./middleware/imgMulter");
 const { addProject, getAllProjects, deleteProject, updateProject, getSingleProject } = require("./controller/ProjectController");
 
@@ -87,4 +87,9 @@ router.delete(
   "/delete-resume/:id",
   deleteResume
 );
+
+//certificate routes
+router.post("/add-Certificate", multerConfig.single("file"), addCertificate);
+router.get("/all-Certificate", getAllCertificates);
+router.delete("/certificate/:id", deleteCertificate);
 module.exports = router;
