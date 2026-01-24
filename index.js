@@ -60,3 +60,7 @@ const PORT = 4000;
 Portfolio.listen(PORT, () => {
   console.log(`🚀 Portfolio server running successfully at ${PORT}`);
 });
+Portfolio.get("/", (req, res) => {
+  res.send("Backend is running successfully 🚀");
+});
+
